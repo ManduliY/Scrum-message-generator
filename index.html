@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Scrum Update</title>
+<style>
+  :root {
+    --bg: #EEF1F6;
+    --card-bg: #FFFFFF;
+    --ink: #1B2430;
+    --ink-soft: #5B6B7C;
+    --border: #DFE4EA;
+    --accent: #3454D1;
+    --accent-dark: #2740A6;
+    --accent-soft: #E8ECFB;
+    --success: #1E8E5A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 20px;
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+
+  .card {
+    width: 100%;
+    max-width: 600px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px 36px 30px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+  }
+
+  header { margin-bottom: 28px; }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+
+  .field { margin-bottom: 20px; }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+
+  label .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 92px;
+    resize: vertical;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: #FBFCFE;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+
+  textarea::placeholder { color: #9AA6B2; }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    background: #fff;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 0 4px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease, transform .05s ease;
+  }
+
+  button:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+
+  .btn-secondary {
+    background: #fff;
+    border-color: var(--border);
+    color: var(--ink);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-secondary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .copied-note {
+    display: none;
+    font-size: 12.5px;
+    color: var(--success);
+    font-weight: 600;
+  }
+  .copied-note.show { display: inline-block; }
+
+  .output-wrap {
+    margin-top: 22px;
+  }
+
+  .output-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 6px 0 8px;
+  }
+
+  .slack-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .output-box {
+    background: #F7F9FC;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    min-height: 24px;
+  }
+
+  .output-box.empty {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 26px 22px 24px; }
+    .actions { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <header>
+      <h1>Daily Scrum Update</h1>
+    </header>
+
+    <div class="field">
+      <label for="yesterday"><span class="dot"></span>Yesterday's Tasks</label>
+      <textarea id="yesterday" placeholder="-Enter text" spellcheck="true"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="today"><span class="dot"></span>Today's Tasks</label>
+      <textarea id="today" placeholder="-Enter text" spellcheck="true"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="blockers"><span class="dot"></span>Blockers</label>
+      <textarea id="blockers" placeholder="-Enter text" spellcheck="true"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="generateBtn">Generate Message</button>
+      <button class="btn-secondary" id="copyBtn" disabled>Copy Message</button>
+      <span class="copied-note" id="copiedNote">Copied to clipboard!</span>
+    </div>
+
+    <div class="output-wrap" id="outputWrap">
+      <div class="output-label"><span class="slack-badge">✉</span>Message Preview</div>
+      <div class="output-box empty" id="outputBox">Your message will appear here once you click "Generate Message".</div>
+    </div>
+  </div>
+
+<script>
+  const yesterdayEl = document.getElementById('yesterday');
+  const todayEl = document.getElementById('today');
+  const blockersEl = document.getElementById('blockers');
+  const generateBtn = document.getElementById('generateBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const outputWrap = document.getElementById('outputWrap');
+  const outputBox = document.getElementById('outputBox');
+  const copiedNote = document.getElementById('copiedNote');
+
+  const COMMON_TYPOS = {
+    teh: 'the', adn: 'and', taht: 'that', wich: 'which', thier: 'their',
+    recieve: 'receive', recieved: 'received', seperate: 'separate',
+    definately: 'definitely', occured: 'occurred', untill: 'until',
+    becuase: 'because', acheive: 'achieve', accomodate: 'accommodate',
+    adress: 'address', arguement: 'argument', begining: 'beginning',
+    beleive: 'believe', calender: 'calendar', commited: 'committed',
+    concious: 'conscious', enviroment: 'environment', existance: 'existence',
+    goverment: 'government', imediately: 'immediately', independant: 'independent',
+    knowlege: 'knowledge', maintainance: 'maintenance', noticable: 'noticeable',
+    occassion: 'occasion', persistant: 'persistent', priviledge: 'privilege',
+    publically: 'publicly', recomend: 'recommend', refered: 'referred',
+    succesful: 'successful', succesfully: 'successfully', suprise: 'surprise',
+    tommorow: 'tomorrow', wether: 'whether', writen: 'written',
+    updateing: 'updating', finilize: 'finalize', finilized: 'finalized',
+    complted: 'completed', compelted: 'completed', reqiure: 'require',
+    reqiured: 'required', canddates: 'candidates', canidates: 'candidates',
+    candiates: 'candidates', canditates: 'candidates', recieveing: 'receiving',
+    schedual: 'schedule', schedualed: 'scheduled', shcedule: 'schedule'
+  };
+
+  function fixTypos(text) {
+    return text.replace(/[A-Za-z']+/g, (word) => {
+      const lower = word.toLowerCase();
+      const fix = COMMON_TYPOS[lower];
+      if (!fix) return word;
+      return word[0] === word[0].toUpperCase()
+        ? fix.charAt(0).toUpperCase() + fix.slice(1)
+        : fix;
+    });
+  }
+
+  function cleanItemText(text) {
+    let t = text.replace(/\s+/g, ' ').trim();
+    t = fixTypos(t);
+    t = t.replace(/[.,;]+$/, '');           // drop trailing punctuation (we add our own)
+    t = t.replace(/\bi\b/g, 'I');           // capitalize standalone "i"
+    return t;
+  }
+
+  function toNaturalList(value) {
+    const items = value
+      .split('\n')
+      .map(l => l.trim().replace(/^-+\s*/, ''))
+      .filter(l => l.length > 0)
+      .map(cleanItemText);
+
+    if (items.length === 0) return { list: '', count: 0 };
+    if (items.length === 1) return { list: items[0], count: 1 };
+    if (items.length === 2) return { list: items[0] + ' and ' + items[1], count: 2 };
+    return {
+      list: items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1],
+      count: items.length
+    };
+  }
+
+  function buildMessage() {
+    const today = toNaturalList(todayEl.value);
+    const yesterday = toNaturalList(yesterdayEl.value);
+    const blockers = toNaturalList(blockersEl.value);
+
+    const todaySentence = today.count === 0
+      ? "I don't have anything planned for today."
+      : "Today I'll be working on " + today.list + ".";
+
+    const yesterdaySentence = yesterday.count === 0
+      ? "I didn't complete any tasks yesterday."
+      : "Yesterday I completed " + yesterday.list + ".";
+
+    let blockerSentence;
+    if (blockers.count === 0) {
+      blockerSentence = "I don't have any blockers.";
+    } else if (blockers.count === 1) {
+      blockerSentence = "My current blocker is " + blockers.list + ".";
+    } else {
+      blockerSentence = "My current blockers are " + blockers.list + ".";
+    }
+
+    return "Hi,\nHere's my daily update.\n" +
+           todaySentence + " " + yesterdaySentence + " " + blockerSentence;
+  }
+
+  generateBtn.addEventListener('click', () => {
+    const message = buildMessage();
+    outputBox.textContent = message;
+    outputBox.classList.remove('empty');
+    copyBtn.disabled = false;
+    copiedNote.classList.remove('show');
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const text = outputBox.textContent;
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    const originalLabel = copyBtn.textContent;
+    copyBtn.textContent = 'Copied!';
+    copiedNote.classList.add('show');
+
+    setTimeout(() => {
+      copyBtn.textContent = originalLabel;
+      copiedNote.classList.remove('show');
+    }, 1500);
+  });
+</script>
+
+</body>
+</html>
